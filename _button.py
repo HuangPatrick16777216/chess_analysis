@@ -26,8 +26,13 @@ class Button:
         self.text_dims = (text.get_width(), text.get_height())
         self.border = border
         self.border_col = border_col
+        self.loc = (0, 0)
+        self.size = (0, 0)
 
     def draw(self, window, events, loc, size):
+        self.loc = loc
+        self.size = size
+
         mouse_pos = pygame.mouse.get_pos()
         clicked = False
 
@@ -45,3 +50,19 @@ class Button:
         pygame.draw.rect(window, bg_col, (loc[0], loc[1], size[0], size[1]))
         pygame.draw.rect(window, self.border_col, (loc[0], loc[1], size[0], size[1]), self.border)
         window.blit(self.text, (loc[0]+(size[0]-self.text_dims[0]) / 2, loc[1]+(size[1]-self.text_dims[1]) / 2))
+
+    def clicked(self, events):
+        mouse_pos = pygame.mouse.get_pos()
+        clicked = False
+
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    clicked = True
+                    break
+
+        if self.loc[0] <= mouse_pos[0] <= self.loc[0]+self.size[0] and self.loc[1] <= mouse_pos[1] <= self.loc[1]+self.size[1]:
+            if clicked:
+                return True
+
+        return False
