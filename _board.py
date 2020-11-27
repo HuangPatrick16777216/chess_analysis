@@ -17,6 +17,7 @@
 
 import os
 import multiprocessing
+import threading
 import pygame
 import chess
 import chess.pgn
@@ -44,6 +45,9 @@ class Board:
 
         self.engine_path = None
         self.engine = None
+
+        self.analyze_status = "NOT_ANALYZED"
+        self.analyze_evals = []
 
     def draw(self, window, events, loc, size):
         sq_size = size / 8
@@ -100,12 +104,16 @@ class Board:
         return surface
 
     def draw_elements(self, window, events, loc, size):
-        self.button_load_pgn.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+25)), (200, 50))
-        self.button_load_engine.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+100)), (200, 50))
-        if self.engine_path is not None:
-            engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
-            window.blit(engine_text, ((loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165)))
-            self.button_analyze.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+250)), (200, 50))
+        if self.analyze_status == "ANALYZING":
+            pass
+        
+        else:
+            self.button_load_pgn.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+25)), (200, 50))
+            self.button_load_engine.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+100)), (200, 50))
+            if self.engine_path is not None:
+                engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
+                window.blit(engine_text, ((loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165)))
+                self.button_analyze.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+250)), (200, 50))
 
     def update(self, events):
         keys = pygame.key.get_pressed()
@@ -132,6 +140,8 @@ class Board:
             self.load_pgn()
         if self.button_load_engine.clicked(events):
             self.load_engine()
+        if self.button_analyze.clicked(events):
+            threading.Thread(target=self.analyze, args=(18,)).start()
 
     def load_pgn(self):
         path = askopenfilename()
@@ -140,9 +150,11 @@ class Board:
 
         with open(path, "r") as pgn:
             self.pgn_moves = list(chess.pgn.read_game(pgn).mainline_moves())
+        self.update_pgn_move()
+
         self.pgn_curr_move = 0
         self.pgn_loaded = True
-        self.update_pgn_move()
+        self.analyze_status = "NOT_ANALYZED"
 
     def load_engine(self):
         path = askopenfilename()
@@ -169,6 +181,20 @@ class Board:
             )
         else:
             self.pgn_last_move = None
+
+    def analyze(self, depth):
+        self.analyze_status = "ANALYZING"
+        self.analyze_evals = []
+        board = chess.Board()
+
+        for move in self.pgn_moves:
+            curr_eval = self.engine.analyse(board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
+            self.analyze_evals.append(curr_eval)
+            board.push(move)
+        curr_eval = self.engine.analyse(board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
+        self.analyze_evals.append(curr_eval)
+
+        self.analyze_status = "DONE"
 
     def quit(self):
         if self.engine is not None:
