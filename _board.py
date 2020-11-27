@@ -27,6 +27,7 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 from _constants import *
 from _button import Button
+from _slider import Slider
 Tk().withdraw()
 
 
@@ -34,6 +35,7 @@ class Board:
     button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load PGN", 1, BLACK), 3, GRAY)
     button_load_engine = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load Engine", 1, BLACK), 3, GRAY)
     button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Analyze", 1, BLACK), 3, GRAY)
+    slider_depth = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, 30), init_val=10)
 
     def __init__(self):
         self.position = chess.Board()
@@ -120,7 +122,9 @@ class Board:
             if self.engine_path is not None:
                 engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
                 window.blit(engine_text, (loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165))
+
                 self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
+                self.slider_depth.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+325), (200, 10), 15)
 
     def update(self, events):
         keys = pygame.key.get_pressed()
