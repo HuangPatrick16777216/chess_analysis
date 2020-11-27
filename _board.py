@@ -93,16 +93,24 @@ class Board:
         self.button_load_pgn.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+25)), (200, 50))
 
     def update(self, events):
+        keys = pygame.key.get_pressed()
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x:
                     self.flipped = not self.flipped
 
                 elif event.key == pygame.K_LEFT:
-                    self.pgn_curr_move = max(self.pgn_curr_move-1, 0)
+                    if keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]:
+                        self.pgn_curr_move = 0
+                    else:
+                        self.pgn_curr_move = max(self.pgn_curr_move-1, 0)
                     self.update_pgn_move()
                 elif event.key == pygame.K_RIGHT:
-                    self.pgn_curr_move = min(self.pgn_curr_move+1, len(self.pgn_moves))
+                    if keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]:
+                        self.pgn_curr_move = len(self.pgn_moves)
+                    else:
+                        self.pgn_curr_move = min(self.pgn_curr_move+1, len(self.pgn_moves))
                     self.update_pgn_move()
 
         if self.button_load_pgn.clicked(events):
