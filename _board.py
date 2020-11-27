@@ -36,6 +36,7 @@ class Board:
     button_load_engine = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load Engine", 1, BLACK), 3, GRAY)
     button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Analyze", 1, BLACK), 3, GRAY)
     slider_depth = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, 30), init_val=10)
+    slider_threads = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, multiprocessing.cpu_count()), init_val=multiprocessing.cpu_count()-1)
 
     def __init__(self):
         self.position = chess.Board()
@@ -119,15 +120,17 @@ class Board:
         else:
             self.button_load_pgn.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+25), (200, 50))
             self.button_load_engine.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+100), (200, 50))
-            if self.engine_path is not None:
+            if self.engine_path is not None and self.pgn_loaded:
                 engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
                 window.blit(engine_text, (loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165))
-                
                 depth_text = FONT_SMALL.render(f"Depth: {self.slider_depth.value}", 1, WHITE)
                 window.blit(depth_text, (loc[0] + size[0] / 2 - depth_text.get_width()/2, loc[1]+350))
+                threads_text = FONT_SMALL.render(f"Threads: {self.slider_threads.value}", 1, WHITE)
+                window.blit(threads_text, (loc[0] + size[0] / 2 - threads_text.get_width()/2, loc[1]+410))
 
                 self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
                 self.slider_depth.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+325), (200, 10), 15)
+                self.slider_threads.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+385), (200, 10), 15)
 
     def update(self, events):
         keys = pygame.key.get_pressed()
@@ -178,8 +181,6 @@ class Board:
 
         self.engine_path = path
         self.engine = chess.engine.SimpleEngine.popen_uci(path)
-        if "Threads" in self.engine.options:
-            self.engine.configure({"Threads": max(multiprocessing.cpu_count() - 1, 1)})
 
     def update_pgn_move(self):
         if not self.pgn_loaded:
@@ -202,6 +203,9 @@ class Board:
         self.analyze_evals = []
         self.analyze_curr_move = 0
         board = chess.Board()
+
+        if "Threads" in self.engine.options:
+            self.engine.configure({"Threads": self.slider_threads.value})
 
         for i, move in enumerate(self.pgn_moves):
             self.analyze_curr_move = i
