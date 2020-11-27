@@ -122,6 +122,9 @@ class Board:
             if self.engine_path is not None:
                 engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
                 window.blit(engine_text, (loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165))
+                
+                depth_text = FONT_SMALL.render(f"Depth: {self.slider_depth.value}", 1, WHITE)
+                window.blit(depth_text, (loc[0] + size[0] / 2 - depth_text.get_width()/2, loc[1]+350))
 
                 self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
                 self.slider_depth.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+325), (200, 10), 15)
@@ -152,6 +155,7 @@ class Board:
         if self.button_load_engine.clicked(events):
             self.load_engine()
         if self.button_analyze.clicked(events):
+            self.analyze_depth = self.slider_depth.value
             threading.Thread(target=self.analyze, args=(self.analyze_depth,)).start()
 
     def load_pgn(self):
