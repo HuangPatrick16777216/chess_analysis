@@ -42,8 +42,11 @@ def main():
                 screen = (event.w, event.h)
                 WINDOW = pygame.display.set_mode(screen, pygame.RESIZABLE)
 
+        board_size = min(screen)-50
+
         WINDOW.fill(BLACK)
-        board.draw(WINDOW, events, (25, 25), min(screen)-50)
+        board.draw(WINDOW, events, (25, 25), board_size)
+        board.draw_elements(WINDOW, events, (board_size+50, 25), (screen[0]-board_size-75, screen[1]-50))
 
 
 main()
