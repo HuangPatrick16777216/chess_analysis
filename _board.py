@@ -142,7 +142,7 @@ class Board:
         if self.button_load_engine.clicked(events):
             self.load_engine()
         if self.button_analyze.clicked(events):
-            threading.Thread(target=self.analyze, args=(18,)).start()
+            threading.Thread(target=self.analyze, args=(10,)).start()
 
     def load_pgn(self):
         path = askopenfilename()
@@ -188,11 +188,14 @@ class Board:
         self.analyze_evals = []
         board = chess.Board()
 
-        for move in self.pgn_moves:
+        print(f"total: {len(self.pgn_moves)}")
+        for i, move in enumerate(self.pgn_moves):
+            print(i)
             self.analyze_evals.append(self.analyze_move(board, move, depth))
             board.push(move)
 
         self.analyze_status = "DONE"
+        print(self.analyze_evals)
 
     def analyze_move(self, position: chess.Board, move, depth):
         legal_moves = list(position.generate_legal_moves())
@@ -201,9 +204,10 @@ class Board:
         end_board = copy.deepcopy(position)
         end_board.push(move)
         end_eval = self.engine.analyse(end_board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
+        int_end_eval = self.parse_eval(end_eval)
 
         if num_legal_moves == 1:
-            return {"eval": end_eval, "type": "forced"}
+            return {"eval": end_eval, "bestmove": legal_moves[0], "type": "forced"}
 
         evals = []
         best_eval = float("-inf") if position.turn else float("inf")
@@ -212,14 +216,14 @@ class Board:
             new_board = copy.deepcopy(position)
             new_board.push(move)
             curr_eval = self.engine.analyse(new_board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
-            if not curr_eval[0] == "#":
-                evals.append(int(curr_eval))
+            int_eval = self.parse_eval(curr_eval)
+            evals.append(int_eval)
 
-            if curr_eval > best_eval and position.turn:
-                best_eval = curr_eval
+            if int_eval > best_eval and position.turn:
+                best_eval = int_eval
                 best_move = move
-            elif curr_eval < best_eval and not position.turn:
-                best_eval = curr_eval
+            elif int_eval < best_eval and not position.turn:
+                best_eval = int_eval
                 best_move = move
 
         evals = sorted(evals)
@@ -228,12 +232,15 @@ class Board:
 
         percentile = None
         for i, eval in enumerate(evals):
-            if end_eval <= eval and position.turn or end_eval >= eval and not position.turn:
+            if int_end_eval <= eval and position.turn or int_end_eval >= eval and not position.turn:
                 percentile = i / num_legal_moves
                 break
+        if percentile is None:
+            percentile = 1
 
         info = {
             "eval": end_eval,
+            "bestmove": best_move,
             "type": None
         }
         if 0 <= percentile < 0.1:
@@ -254,6 +261,13 @@ class Board:
             info["type"] = "brilliant"
 
         return info
+
+    def parse_eval(self, eval):
+        eval = str(eval)
+        if eval[0] == "#":
+            return float("inf") * int(eval[1:])
+        else:
+            return int(eval)
 
     def quit(self):
         if self.engine is not None:
