@@ -39,7 +39,7 @@ def main():
                 return
 
             elif event.type == pygame.VIDEORESIZE:
-                screen = (event.w, event.h)
+                screen = (max(event.w, 480), max(event.h, 360))
                 WINDOW = pygame.display.set_mode(screen, pygame.RESIZABLE)
 
         board_size = min(screen)-50
