@@ -22,9 +22,16 @@ pygame.init()
 PARDIR = os.path.realpath(os.path.dirname(__file__))
 SCREEN = (1280, 720)
 FPS = 60
+
 IMAGES = {}
+FONT_SMALL = pygame.font.SysFont("arial", 20)
 
 BLACK = (0, 0, 0)
+GRAY_LIGHT = (64, 64, 64)
+GRAY = (128, 128, 128)
+GRAY_DARK = (192, 192, 192)
+WHITE = (255, 255, 255)
+
 BOARD_WHITE = (220, 220, 210)
 BOARD_WHITE_SELECT = (240, 240, 200)
 BOARD_WHITE_MARK = (190, 190, 180)
