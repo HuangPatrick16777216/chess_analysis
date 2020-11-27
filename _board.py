@@ -17,15 +17,23 @@
 
 import pygame
 import chess
+import chess.pgn
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 from _constants import *
 from _button import Button
+Tk().withdraw()
 
 
 class Board:
     button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load PGN", 1, BLACK), 3, GRAY)
+
     def __init__(self):
         self.position = chess.Board()
         self.flipped = False
+        self.pgn_loaded = False
+        self.pgn_moves = None
+        self.pgn_curr_move = 0
 
     def draw(self, window, events, loc, size):
         sq_size = size / 8
@@ -74,3 +82,32 @@ class Board:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x:
                     self.flipped = not self.flipped
+
+                elif event.key == pygame.K_LEFT:
+                    self.pgn_curr_move = max(self.pgn_curr_move-1, 0)
+                    self.update_pgn_move()
+                elif event.key == pygame.K_RIGHT:
+                    self.pgn_curr_move = min(self.pgn_curr_move+1, len(self.pgn_moves))
+                    self.update_pgn_move()
+
+        if self.button_load_pgn.clicked(events):
+            self.load_pgn()
+
+    def load_pgn(self):
+        path = askopenfilename()
+        if path == "":
+            return
+
+        with open(path, "r") as pgn:
+            self.pgn_moves = list(chess.pgn.read_game(pgn).mainline_moves())
+        self.pgn_curr_move = 0
+        self.pgn_loaded = True
+        self.update_pgn_move()
+
+    def update_pgn_move(self):
+        if not self.pgn_loaded:
+            return
+
+        self.position = chess.Board()
+        for move in self.pgn_moves[:self.pgn_curr_move]:
+            self.position.push(move)
