@@ -25,10 +25,12 @@ class Board:
         self.position = chess.Board()
         self.flipped = False
 
-    def draw(self, window, loc, size):
+    def draw(self, window, events, loc, size):
         sq_size = size / 8
-
         window.blit(self.draw_squares(sq_size), loc)
+        window.blit(self.draw_pieces(sq_size), loc)
+
+        self.update(events)
         
     def draw_squares(self, sq_size):
         size = int(sq_size * 8)
@@ -41,3 +43,29 @@ class Board:
                 pygame.draw.rect(surface, color, curr_loc+(sq_size+1, sq_size+1))
 
         return surface
+
+    def draw_pieces(self, sq_size):
+        size = int(sq_size * 8)
+        surface = pygame.Surface((size, size), pygame.SRCALPHA)
+
+        piece_size = int(sq_size * 0.9)
+        piece_offset = sq_size * 0.05
+        for row in range(8):
+            for col in range(8):
+                piece = self.position.piece_at(8 * (7-row) + col)
+                if piece is not None:
+                    image = pygame.transform.scale(IMAGES[piece.symbol()], (piece_size, piece_size))
+                    if self.flipped:
+                        image = pygame.transform.rotate(image, 180)
+                    curr_loc = (col*sq_size + piece_offset, row*sq_size + piece_offset)
+                    surface.blit(image, curr_loc)
+
+        if self.flipped:
+            surface = pygame.transform.rotate(surface, 180)
+        return surface
+
+    def update(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_x:
+                    self.flipped = not self.flipped
