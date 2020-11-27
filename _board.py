@@ -60,6 +60,13 @@ class Board:
                 color = BOARD_WHITE_SELECT if sum(square) % 2 == 0 else BOARD_BLACK_SELECT
                 pygame.draw.rect(surface, color, curr_loc+(sq_size+1, sq_size+1))
 
+        for col in range(1, 8):
+            curr_loc = col * sq_size
+            pygame.draw.line(surface, BLACK, (curr_loc, 0), (curr_loc, size))
+        for row in range(1, 8):
+            curr_loc = row * sq_size
+            pygame.draw.line(surface, BLACK, (0, curr_loc), (size, curr_loc))
+
         return surface
 
     def draw_pieces(self, sq_size):
