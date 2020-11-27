@@ -67,6 +67,8 @@ class Board:
             curr_loc = row * sq_size
             pygame.draw.line(surface, BLACK, (0, curr_loc), (size, curr_loc))
 
+        if self.flipped:
+            surface = pygame.transform.rotate(surface, 180)
         return surface
 
     def draw_pieces(self, sq_size):
