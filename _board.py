@@ -50,6 +50,7 @@ class Board:
         self.analyze_status = "NOT_ANALYZED"
         self.analyze_evals = []
         self.analyze_curr_move = 0
+        self.analyze_depth = 12
 
     def draw(self, window, events, loc, size):
         sq_size = size / 8
@@ -110,7 +111,7 @@ class Board:
             progress = self.analyze_curr_move / len(self.pgn_moves)
             pygame.draw.rect(window, BOARD_BLACK, (loc[0]+25, loc[1], progress*(size[0]-50), 10))
             pygame.draw.rect(window, WHITE, (loc[0]+25, loc[1], size[0]-50, 10), 1)
-            text = FONT_SMALL.render(f"Analyzing... Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}. {int(progress*100)}%", 1, WHITE)
+            text = FONT_SMALL.render(f"Analyzing, depth={self.analyze_depth}... Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}, {int(progress*100)}%", 1, WHITE)
             window.blit(text, (loc[0] + (size[0]-text.get_width())/2, loc[1]+50))
         
         else:
@@ -147,7 +148,7 @@ class Board:
         if self.button_load_engine.clicked(events):
             self.load_engine()
         if self.button_analyze.clicked(events):
-            threading.Thread(target=self.analyze, args=(14,)).start()
+            threading.Thread(target=self.analyze, args=(self.analyze_depth,)).start()
 
     def load_pgn(self):
         path = askopenfilename()
