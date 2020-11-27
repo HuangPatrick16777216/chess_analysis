@@ -40,10 +40,10 @@ def main():
 
             elif event.type == pygame.VIDEORESIZE:
                 screen = (event.w, event.h)
-                WINDOW = pygame.display.set_mode(screen)
+                WINDOW = pygame.display.set_mode(screen, pygame.RESIZABLE)
 
         WINDOW.fill(BLACK)
-        board.draw(WINDOW, (25, 25), min(screen)-50)
+        board.draw(WINDOW, events, (25, 25), min(screen)-50)
 
 
 main()
