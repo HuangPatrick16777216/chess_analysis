@@ -18,6 +18,7 @@
 import os
 import multiprocessing
 import threading
+import copy
 import pygame
 import chess
 import chess.pgn
@@ -188,13 +189,71 @@ class Board:
         board = chess.Board()
 
         for move in self.pgn_moves:
-            curr_eval = self.engine.analyse(board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
-            self.analyze_evals.append(curr_eval)
+            self.analyze_evals.append(self.analyze_move(board, move, depth))
             board.push(move)
-        curr_eval = self.engine.analyse(board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
-        self.analyze_evals.append(curr_eval)
 
         self.analyze_status = "DONE"
+
+    def analyze_move(self, position: chess.Board, move, depth):
+        legal_moves = list(position.generate_legal_moves())
+        num_legal_moves = len(legal_moves)
+
+        end_board = copy.deepcopy(position)
+        end_board.push(move)
+        end_eval = self.engine.analyse(end_board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
+
+        if num_legal_moves == 1:
+            return {"eval": end_eval, "type": "forced"}
+
+        evals = []
+        best_eval = float("-inf") if position.turn else float("inf")
+        best_move = None
+        for move in legal_moves:
+            new_board = copy.deepcopy(position)
+            new_board.push(move)
+            curr_eval = self.engine.analyse(new_board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
+            if not curr_eval[0] == "#":
+                evals.append(int(curr_eval))
+
+            if curr_eval > best_eval and position.turn:
+                best_eval = curr_eval
+                best_move = move
+            elif curr_eval < best_eval and not position.turn:
+                best_eval = curr_eval
+                best_move = move
+
+        evals = sorted(evals)
+        if not position.turn:
+            evals = reversed(evals)
+
+        percentile = None
+        for i, eval in enumerate(evals):
+            if end_eval <= eval and position.turn or end_eval >= eval and not position.turn:
+                percentile = i / num_legal_moves
+                break
+
+        info = {
+            "eval": end_eval,
+            "type": None
+        }
+        if 0 <= percentile < 0.1:
+            info["type"] = "blunder"
+        elif 0.1 <= percentile < 0.2:
+            info["type"] = "mistake"
+        elif 0.2 <= percentile < 0.3:
+            info["type"] = "inacc"
+        elif 0.3 <= percentile < 0.5:
+            info["type"] = "good"
+        elif 0.5 <= percentile < 0.6:
+            info["type"] = "great"
+        elif 0.6 <= percentile < 0.8:
+            info["type"] = "excellent"
+        elif 0.8 <= percentile < 0.9:
+            info["type"] = "best"
+        elif 0.9 <= percentile <= 1:
+            info["type"] = "brilliant"
+
+        return info
 
     def quit(self):
         if self.engine is not None:
