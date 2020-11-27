@@ -48,6 +48,7 @@ class Slider:
             else:
                 value = (mouse_pos[0]-loc[0]) / rect_size[0] * self.val_diff + self.val_range[0]
                 value = round(value)
+                value = max(min(value, self.val_range[1]), self.val_range[0])
                 self.value = value
         
         else:
