@@ -18,9 +18,11 @@
 import pygame
 import chess
 from _constants import *
+from _button import Button
 
 
 class Board:
+    button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load PGN", 1, BLACK), 3, GRAY)
     def __init__(self):
         self.position = chess.Board()
         self.flipped = False
@@ -63,6 +65,9 @@ class Board:
         if self.flipped:
             surface = pygame.transform.rotate(surface, 180)
         return surface
+
+    def draw_elements(self, window, events, loc, size):
+        self.button_load_pgn.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+25)), (200, 50))
 
     def update(self, events):
         for event in events:
