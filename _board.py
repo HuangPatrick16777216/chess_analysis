@@ -15,9 +15,12 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+import os
+import multiprocessing
 import pygame
 import chess
 import chess.pgn
+import chess.engine
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 from _constants import *
@@ -27,6 +30,8 @@ Tk().withdraw()
 
 class Board:
     button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load PGN", 1, BLACK), 3, GRAY)
+    button_load_engine = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load Engine", 1, BLACK), 3, GRAY)
+    button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Analyze", 1, BLACK), 3, GRAY)
 
     def __init__(self):
         self.position = chess.Board()
@@ -36,6 +41,9 @@ class Board:
         self.pgn_moves = None
         self.pgn_curr_move = 0
         self.pgn_last_move = None
+
+        self.engine_path = None
+        self.engine = None
 
     def draw(self, window, events, loc, size):
         sq_size = size / 8
@@ -93,6 +101,11 @@ class Board:
 
     def draw_elements(self, window, events, loc, size):
         self.button_load_pgn.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+25)), (200, 50))
+        self.button_load_engine.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+100)), (200, 50))
+        if self.engine_path is not None:
+            engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
+            window.blit(engine_text, ((loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165)))
+            self.button_analyze.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+250)), (200, 50))
 
     def update(self, events):
         keys = pygame.key.get_pressed()
@@ -117,6 +130,8 @@ class Board:
 
         if self.button_load_pgn.clicked(events):
             self.load_pgn()
+        if self.button_load_engine.clicked(events):
+            self.load_engine()
 
     def load_pgn(self):
         path = askopenfilename()
@@ -128,6 +143,16 @@ class Board:
         self.pgn_curr_move = 0
         self.pgn_loaded = True
         self.update_pgn_move()
+
+    def load_engine(self):
+        path = askopenfilename()
+        if path == "":
+            return
+
+        self.engine_path = path
+        self.engine = chess.engine.SimpleEngine.popen_uci(path)
+        if "Threads" in self.engine.options:
+            self.engine.configure({"Threads": multiprocessing.cpu_count() - 1})
 
     def update_pgn_move(self):
         if not self.pgn_loaded:
@@ -144,3 +169,7 @@ class Board:
             )
         else:
             self.pgn_last_move = None
+
+    def quit(self):
+        if self.engine is not None:
+            self.engine.quit()
