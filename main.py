@@ -35,6 +35,7 @@ def main():
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
+                board.quit()
                 pygame.quit()
                 return
 
