@@ -49,6 +49,7 @@ class Board:
 
         self.analyze_status = "NOT_ANALYZED"
         self.analyze_evals = []
+        self.analyze_curr_move = 0
 
     def draw(self, window, events, loc, size):
         sq_size = size / 8
@@ -106,15 +107,19 @@ class Board:
 
     def draw_elements(self, window, events, loc, size):
         if self.analyze_status == "ANALYZING":
-            pass
+            progress = self.analyze_curr_move / len(self.pgn_moves)
+            pygame.draw.rect(window, BOARD_BLACK, (loc[0]+25, loc[1], progress*(size[0]-50), 10))
+            pygame.draw.rect(window, WHITE, (loc[0]+25, loc[1], size[0]-50, 10), 1)
+            text = FONT_SMALL.render(f"Analyzing... Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}. {int(progress*100)}%", 1, WHITE)
+            window.blit(text, (loc[0] + (size[0]-text.get_width())/2, loc[1]+50))
         
         else:
-            self.button_load_pgn.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+25)), (200, 50))
-            self.button_load_engine.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+100)), (200, 50))
+            self.button_load_pgn.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+25), (200, 50))
+            self.button_load_engine.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+100), (200, 50))
             if self.engine_path is not None:
                 engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
-                window.blit(engine_text, ((loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165)))
-                self.button_analyze.draw(window, events, ((loc[0] + size[0] / 2 - 100, loc[1]+250)), (200, 50))
+                window.blit(engine_text, (loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165))
+                self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
 
     def update(self, events):
         keys = pygame.key.get_pressed()
@@ -186,11 +191,11 @@ class Board:
     def analyze(self, depth):
         self.analyze_status = "ANALYZING"
         self.analyze_evals = []
+        self.analyze_curr_move = 0
         board = chess.Board()
 
-        print(f"total: {len(self.pgn_moves)}")
         for i, move in enumerate(self.pgn_moves):
-            print(i)
+            self.analyze_curr_move = i
             self.analyze_evals.append(self.analyze_move(board, move, depth))
             board.push(move)
 
