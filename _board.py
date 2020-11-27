@@ -31,9 +31,11 @@ class Board:
     def __init__(self):
         self.position = chess.Board()
         self.flipped = False
+        
         self.pgn_loaded = False
         self.pgn_moves = None
         self.pgn_curr_move = 0
+        self.pgn_last_move = None
 
     def draw(self, window, events, loc, size):
         sq_size = size / 8
@@ -50,6 +52,12 @@ class Board:
             for col in range(8):
                 curr_loc = (col*sq_size, row*sq_size)
                 color = BOARD_WHITE if (row+col) % 2 == 0 else BOARD_BLACK
+                pygame.draw.rect(surface, color, curr_loc+(sq_size+1, sq_size+1))
+
+        if self.pgn_last_move is not None:
+            for square in self.pgn_last_move:
+                curr_loc = (square[1]*sq_size, square[0]*sq_size)
+                color = BOARD_WHITE_SELECT if sum(square) % 2 == 0 else BOARD_BLACK_SELECT
                 pygame.draw.rect(surface, color, curr_loc+(sq_size+1, sq_size+1))
 
         return surface
@@ -111,3 +119,11 @@ class Board:
         self.position = chess.Board()
         for move in self.pgn_moves[:self.pgn_curr_move]:
             self.position.push(move)
+
+        if self.pgn_curr_move > 0:
+            self.pgn_last_move = (
+                (7 - (self.pgn_moves[self.pgn_curr_move-1].from_square//8), self.pgn_moves[self.pgn_curr_move-1].from_square % 8),
+                (7 - (self.pgn_moves[self.pgn_curr_move-1].to_square//8), self.pgn_moves[self.pgn_curr_move-1].to_square % 8)
+            )
+        else:
+            self.pgn_last_move = None
