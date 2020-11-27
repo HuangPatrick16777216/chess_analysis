@@ -39,7 +39,7 @@ class Slider:
         mouse_pos = pygame.mouse.get_pos()
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button == 1 and loc[0] <= mouse_pos[0] <= loc[0]+rect_size[0] and loc[1] <= mouse_pos[1] <= loc[1]+rect_size[1]:
                     mouse_click = True
 
         if self.dragging:
