@@ -17,7 +17,9 @@
 
 import os
 import pygame
+from _functions import centered_blit
 pygame.init()
+
 
 PARDIR = os.path.realpath(os.path.dirname(__file__))
 SCREEN = (1280, 720)
@@ -25,6 +27,8 @@ FPS = 60
 
 IMAGES = {}
 FONT_SMALL = pygame.font.SysFont("arial", 20)
+FONT_LARGE = pygame.font.SysFont("arial", 350)
+MOVE_BLUNDER = pygame.Surface((512, 512), pygame.SRCALPHA)
 
 BLACK = (0, 0, 0)
 GRAY_LIGHT = (64, 64, 64)
@@ -39,6 +43,10 @@ BOARD_BLACK = (90, 140, 70)
 BOARD_BLACK_SELECT = (140, 180, 80)
 BOARD_BLACK_MARK = (70, 120, 50)
 
+blunder_red = (180, 10, 5)
+blunder_symbol = FONT_LARGE.render("??", 1, WHITE)
+
+
 for file in os.listdir(os.path.join(PARDIR, "images")):
     if file.endswith(".png"):
         name = file.replace(".png", "")
@@ -48,3 +56,7 @@ for file in os.listdir(os.path.join(PARDIR, "images")):
             IMAGES[new_name] = image
         else:
             IMAGES[name] = image
+
+pygame.draw.circle(MOVE_BLUNDER, WHITE, (256, 256), 256)
+pygame.draw.circle(MOVE_BLUNDER, blunder_red, (256, 256), 240)
+centered_blit(MOVE_BLUNDER, blunder_symbol, (256, 256))
