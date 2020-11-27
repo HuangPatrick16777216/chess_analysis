@@ -147,7 +147,7 @@ class Board:
         if self.button_load_engine.clicked(events):
             self.load_engine()
         if self.button_analyze.clicked(events):
-            threading.Thread(target=self.analyze, args=(10,)).start()
+            threading.Thread(target=self.analyze, args=(14,)).start()
 
     def load_pgn(self):
         path = askopenfilename()
@@ -170,7 +170,7 @@ class Board:
         self.engine_path = path
         self.engine = chess.engine.SimpleEngine.popen_uci(path)
         if "Threads" in self.engine.options:
-            self.engine.configure({"Threads": multiprocessing.cpu_count() - 1})
+            self.engine.configure({"Threads": max(multiprocessing.cpu_count() - 1, 1)})
 
     def update_pgn_move(self):
         if not self.pgn_loaded:
@@ -200,7 +200,6 @@ class Board:
             board.push(move)
 
         self.analyze_status = "DONE"
-        print(self.analyze_evals)
 
     def analyze_move(self, position: chess.Board, move, depth):
         legal_moves = list(position.generate_legal_moves())
