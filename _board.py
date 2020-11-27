@@ -114,23 +114,27 @@ class Board:
             progress = self.analyze_curr_move / len(self.pgn_moves)
             pygame.draw.rect(window, BOARD_BLACK, (loc[0]+25, loc[1], progress*(size[0]-50), 10))
             pygame.draw.rect(window, WHITE, (loc[0]+25, loc[1], size[0]-50, 10), 1)
-            text = FONT_SMALL.render(f"Analyzing, depth={self.analyze_depth}... Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}, {int(progress*100)}%", 1, WHITE)
+            text = FONT_SMALL.render(f"Analyzing: Depth = {self.analyze_depth}, Threads = {self.slider_threads.value}, Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}, {int(progress*100)}%", 1, WHITE)
             window.blit(text, (loc[0] + (size[0]-text.get_width())/2, loc[1]+50))
         
         else:
-            self.button_load_pgn.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+25), (200, 50))
-            self.button_load_engine.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+100), (200, 50))
-            if self.engine_path is not None and self.pgn_loaded:
-                engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
-                window.blit(engine_text, (loc[0] + size[0] / 2 - engine_text.get_width()/2, loc[1]+165))
-                depth_text = FONT_SMALL.render(f"Depth: {self.slider_depth.value}", 1, WHITE)
-                window.blit(depth_text, (loc[0] + size[0] / 2 - depth_text.get_width()/2, loc[1]+350))
-                threads_text = FONT_SMALL.render(f"Threads: {self.slider_threads.value}", 1, WHITE)
-                window.blit(threads_text, (loc[0] + size[0] / 2 - threads_text.get_width()/2, loc[1]+410))
+            sep_size = (size[0] - 400) / 3
+            self.button_load_pgn.draw(window, events, (loc[0] + sep_size, loc[1]+25), (200, 50))
+            self.button_load_engine.draw(window, events, (loc[0] + sep_size*2 + 200, loc[1]+25), (200, 50))
 
-                self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
-                self.slider_depth.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+325), (200, 10), 15)
-                self.slider_threads.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+385), (200, 10), 15)
+            if self.engine_path is not None:
+                engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
+                window.blit(engine_text, (loc[0] + sep_size*2 + 200 + engine_text.get_width()/2, loc[1]+100))
+
+                if self.pgn_loaded:
+                    depth_text = FONT_SMALL.render(f"Depth: {self.slider_depth.value}", 1, WHITE)
+                    window.blit(depth_text, (loc[0] + sep_size + 100 - depth_text.get_width()/2, loc[1]+225))
+                    threads_text = FONT_SMALL.render(f"Threads: {self.slider_threads.value}", 1, WHITE)
+                    window.blit(threads_text, (loc[0] + sep_size*2 + 300 - threads_text.get_width()/2, loc[1]+225))
+
+                    self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
+                    self.slider_depth.draw(window, events, (loc[0] + sep_size, loc[1]+200), (200, 10), 15)
+                    self.slider_threads.draw(window, events, (loc[0] + sep_size*2 + 200, loc[1]+200), (200, 10), 15)
 
     def update(self, events):
         keys = pygame.key.get_pressed()
