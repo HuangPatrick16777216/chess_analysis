@@ -15,5 +15,5 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-def centered_blit(window, surface, loc):
-    window.blit(surface, (loc[0] - surface.get_width()/2, loc[1] - surface.get_height()/2))
+def centered_blit(window, surface, loc, offset=(0, 0)):
+    window.blit(surface, (loc[0] - surface.get_width()/2 + offset[0], loc[1] - surface.get_height()/2 + offset[1]))

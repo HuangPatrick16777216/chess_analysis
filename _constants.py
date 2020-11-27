@@ -27,9 +27,10 @@ FPS = 60
 
 IMAGES = {}
 FONT_SMALL = pygame.font.SysFont("arial", 20)
-FONT_LARGE = pygame.font.SysFont("arial", 450)
+FONT_LARGE = pygame.font.SysFont("comicsans", 450)
 MOVE_BLUNDER = pygame.Surface((512, 512), pygame.SRCALPHA)
 MOVE_MISTAKE = pygame.Surface((512, 512), pygame.SRCALPHA)
+MOVE_INACC = pygame.Surface((512, 512), pygame.SRCALPHA)
 
 BLACK = (0, 0, 0)
 GRAY_LIGHT = (64, 64, 64)
@@ -48,6 +49,8 @@ blunder_color = (180, 10, 5)
 blunder_symbol = FONT_LARGE.render("??", 1, WHITE)
 mistake_color = (200, 80, 10)
 mistake_symbol = FONT_LARGE.render("?", 1, WHITE)
+inacc_color = (220, 125, 50)
+inacc_symbol = FONT_LARGE.render("?!", 1, WHITE)
 
 
 for file in os.listdir(os.path.join(PARDIR, "images")):
@@ -62,8 +65,12 @@ for file in os.listdir(os.path.join(PARDIR, "images")):
 
 pygame.draw.circle(MOVE_BLUNDER, WHITE, (256, 256), 256)
 pygame.draw.circle(MOVE_BLUNDER, blunder_color, (256, 256), 240)
-centered_blit(MOVE_BLUNDER, blunder_symbol, (256, 256))
+centered_blit(MOVE_BLUNDER, blunder_symbol, (256, 256), offset=(0, 15))
 
 pygame.draw.circle(MOVE_MISTAKE, WHITE, (256, 256), 256)
 pygame.draw.circle(MOVE_MISTAKE, mistake_color, (256, 256), 240)
-centered_blit(MOVE_MISTAKE, mistake_symbol, (256, 256))
+centered_blit(MOVE_MISTAKE, mistake_symbol, (256, 256), offset=(0, 15))
+
+pygame.draw.circle(MOVE_INACC, WHITE, (256, 256), 256)
+pygame.draw.circle(MOVE_INACC, inacc_color, (256, 256), 240)
+centered_blit(MOVE_INACC, inacc_symbol, (256, 256), offset=(-10, 15))
