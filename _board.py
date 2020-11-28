@@ -38,6 +38,8 @@ class Board:
     slider_depth = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, 30), init_val=10)
     slider_threads = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, multiprocessing.cpu_count()), init_val=multiprocessing.cpu_count()-1)
 
+    eval_slider_range = 800
+
     def __init__(self):
         self.position = chess.Board()
         self.flipped = False
@@ -114,7 +116,7 @@ class Board:
         if self.analyze_status == "ANALYZING":
             progress = self.analyze_curr_move / len(self.pgn_moves)
             pygame.draw.rect(window, BOARD_BLACK, (loc[0]+25, loc[1], progress*(size[0]-50), 10))
-            pygame.draw.rect(window, WHITE, (loc[0]+25, loc[1], size[0]-50, 10), 1)
+            pygame.draw.rect(window, GRAY, (loc[0]+25, loc[1], size[0]-50, 10), 1)
             text = FONT_MED.render(f"Analyzing: Depth = {self.analyze_depth}, Threads = {self.slider_threads.value}, Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}, {int(progress*100)}%", 1, WHITE)
             window.blit(text, (loc[0] + (size[0]-text.get_width())/2, loc[1]+50))
         
@@ -140,6 +142,41 @@ class Board:
                 self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
                 self.slider_depth.draw(window, events, (loc[0] + sep_size, loc[1]+200), (200, 10), 15)
                 self.slider_threads.draw(window, events, (loc[0] + sep_size*2 + 200, loc[1]+200), (200, 10), 15)
+
+        if self.analyze_status == "DONE":
+            eval_index = self.pgn_curr_move - 1
+            curr_eval = 0 if eval_index == -1 else str(self.analyze_evals[eval_index]["eval"])
+
+            slider_fac = 0.5
+            slider_text = ""
+            if eval_index != -1:
+                if curr_eval[0] == "#":
+                    if curr_eval[1] == "+":
+                        slider_fac = 1
+                        slider_text = f"+M{curr_eval[2]}"
+                    elif curr_eval[1] == "-":
+                        slider_fac = 0
+                        slider_text = f"-M{curr_eval[2]}"
+
+                else:
+                    eval_range = self.eval_slider_range
+                    if curr_eval[0] == "+":
+                        value = int(curr_eval[1:])
+                        slider_fac = min(0.5 + value / eval_range * 0.3, 0.97)
+                        slider_text = f"+{value/100}"
+                    elif curr_eval[0] == "-":
+                        value = int(curr_eval[1:])
+                        slider_fac = max(0.5 - value / eval_range * 0.3, 0.03)
+                        slider_text = f"-{value/100}"
+
+            eval_start_y = 0
+            rect_params = (loc[0], loc[1]+eval_start_y, 20)
+            pygame.draw.rect(window, GRAY_LIGHT, rect_params + (size[1]-eval_start_y,))
+            pygame.draw.rect(window, BLACK, rect_params + ((1-slider_fac) * (size[1]-eval_start_y),))
+            pygame.draw.rect(window, WHITE, rect_params + (size[1]-eval_start_y,), 2)
+
+            score_text = FONT_MED.render(slider_text, 1, WHITE)
+            window.blit(score_text, (loc[0]+30, loc[1]+eval_start_y+(size[1]-eval_start_y)/2))
 
     def update(self, events):
         keys = pygame.key.get_pressed()
