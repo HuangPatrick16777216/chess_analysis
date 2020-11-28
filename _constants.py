@@ -26,7 +26,8 @@ SCREEN = (1280, 720)
 FPS = 60
 
 IMAGES = {}
-FONT_SMALL = pygame.font.SysFont("arial", 20)
+FONT_SMALL = pygame.font.SysFont("arial", 14)
+FONT_MED = pygame.font.SysFont("arial", 20)
 FONT_LARGE = pygame.font.SysFont("comicsans", 450)
 MOVE_BLUNDER = pygame.Surface((512, 512), pygame.SRCALPHA)
 MOVE_MISTAKE = pygame.Surface((512, 512), pygame.SRCALPHA)

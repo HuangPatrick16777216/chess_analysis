@@ -32,9 +32,9 @@ Tk().withdraw()
 
 
 class Board:
-    button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load PGN", 1, BLACK), 3, GRAY)
-    button_load_engine = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Load Engine", 1, BLACK), 3, GRAY)
-    button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_SMALL.render("Analyze", 1, BLACK), 3, GRAY)
+    button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Load PGN", 1, BLACK), 3, GRAY)
+    button_load_engine = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Load Engine", 1, BLACK), 3, GRAY)
+    button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Analyze", 1, BLACK), 3, GRAY)
     slider_depth = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, 30), init_val=10)
     slider_threads = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, multiprocessing.cpu_count()), init_val=multiprocessing.cpu_count()-1)
 
@@ -46,6 +46,7 @@ class Board:
         self.pgn_moves = None
         self.pgn_curr_move = 0
         self.pgn_last_move = None
+        self.pgn_path = None
 
         self.engine_path = None
         self.engine = None
@@ -114,7 +115,7 @@ class Board:
             progress = self.analyze_curr_move / len(self.pgn_moves)
             pygame.draw.rect(window, BOARD_BLACK, (loc[0]+25, loc[1], progress*(size[0]-50), 10))
             pygame.draw.rect(window, WHITE, (loc[0]+25, loc[1], size[0]-50, 10), 1)
-            text = FONT_SMALL.render(f"Analyzing: Depth = {self.analyze_depth}, Threads = {self.slider_threads.value}, Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}, {int(progress*100)}%", 1, WHITE)
+            text = FONT_MED.render(f"Analyzing: Depth = {self.analyze_depth}, Threads = {self.slider_threads.value}, Move {self.analyze_curr_move//2} of {len(self.pgn_moves)//2}, {int(progress*100)}%", 1, WHITE)
             window.blit(text, (loc[0] + (size[0]-text.get_width())/2, loc[1]+50))
         
         else:
@@ -124,17 +125,21 @@ class Board:
 
             if self.engine_path is not None:
                 engine_text = FONT_SMALL.render(os.path.basename(self.engine_path), 1, WHITE)
-                window.blit(engine_text, (loc[0] + sep_size*2 + 200 + engine_text.get_width()/2, loc[1]+100))
+                window.blit(engine_text, (loc[0] + sep_size*2 + 300 - engine_text.get_width()/2, loc[1]+100))
 
-                if self.pgn_loaded:
-                    depth_text = FONT_SMALL.render(f"Depth: {self.slider_depth.value}", 1, WHITE)
-                    window.blit(depth_text, (loc[0] + sep_size + 100 - depth_text.get_width()/2, loc[1]+225))
-                    threads_text = FONT_SMALL.render(f"Threads: {self.slider_threads.value}", 1, WHITE)
-                    window.blit(threads_text, (loc[0] + sep_size*2 + 300 - threads_text.get_width()/2, loc[1]+225))
+            if self.pgn_loaded:
+                pgn_text = FONT_SMALL.render(os.path.basename(self.pgn_path), 1, WHITE)
+                window.blit(pgn_text, (loc[0] + sep_size + 100 - pgn_text.get_width()/2, loc[1]+100))
 
-                    self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
-                    self.slider_depth.draw(window, events, (loc[0] + sep_size, loc[1]+200), (200, 10), 15)
-                    self.slider_threads.draw(window, events, (loc[0] + sep_size*2 + 200, loc[1]+200), (200, 10), 15)
+            if self.pgn_loaded and self.engine_path is not None:
+                depth_text = FONT_MED.render(f"Depth: {self.slider_depth.value}", 1, WHITE)
+                window.blit(depth_text, (loc[0] + sep_size + 100 - depth_text.get_width()/2, loc[1]+225))
+                threads_text = FONT_MED.render(f"Threads: {self.slider_threads.value}", 1, WHITE)
+                window.blit(threads_text, (loc[0] + sep_size*2 + 300 - threads_text.get_width()/2, loc[1]+225))
+
+                self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
+                self.slider_depth.draw(window, events, (loc[0] + sep_size, loc[1]+200), (200, 10), 15)
+                self.slider_threads.draw(window, events, (loc[0] + sep_size*2 + 200, loc[1]+200), (200, 10), 15)
 
     def update(self, events):
         keys = pygame.key.get_pressed()
@@ -172,11 +177,12 @@ class Board:
 
         with open(path, "r") as pgn:
             self.pgn_moves = list(chess.pgn.read_game(pgn).mainline_moves())
-        self.update_pgn_move()
 
         self.pgn_curr_move = 0
         self.pgn_loaded = True
+        self.pgn_path = path
         self.analyze_status = "NOT_ANALYZED"
+        self.update_pgn_move()
 
     def load_engine(self):
         path = askopenfilename()
