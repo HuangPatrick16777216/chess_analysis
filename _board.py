@@ -37,6 +37,8 @@ class Board:
     button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Analyze", 1, BLACK), 3, GRAY)
     slider_depth = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, 30), init_val=10)
     slider_threads = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, multiprocessing.cpu_count()), init_val=multiprocessing.cpu_count()-1)
+    checkbox_fast_mode = chess.Board()
+    checkbox_fast_mode.value = True
 
     eval_slider_range = 800
 
@@ -183,6 +185,9 @@ class Board:
             score_text = FONT_MED.render(slider_text, 1, WHITE)
             window.blit(score_text, (loc[0]+30, loc[1]+eval_start_y+(size[1]-eval_start_y)/2))
 
+            if not self.analyzed_fast_mode:
+                pass
+
     def update(self, events):
         keys = pygame.key.get_pressed()
 
@@ -254,6 +259,7 @@ class Board:
         self.analyze_status = "ANALYZING"
         self.analyze_evals = []
         self.analyze_curr_move = 0
+        self.analyzed_fast_mode = self.checkbox_fast_mode.value
         board = chess.Board()
 
         if "Threads" in self.engine.options:
@@ -261,12 +267,12 @@ class Board:
 
         for i, move in enumerate(self.pgn_moves):
             self.analyze_curr_move = i
-            self.analyze_evals.append(self.analyze_move(board, move, depth))
+            self.analyze_evals.append(self.analyze_move(board, move, depth, self.checkbox_fast_mode.value))
             board.push(move)
 
         self.analyze_status = "DONE"
 
-    def analyze_move(self, position: chess.Board, move, depth):
+    def analyze_move(self, position: chess.Board, move, depth, fast_mode):
         legal_moves = list(position.generate_legal_moves())
         num_legal_moves = len(legal_moves)
 
@@ -274,6 +280,8 @@ class Board:
         end_board.push(move)
         end_eval = self.engine.analyse(end_board, chess.engine.Limit(depth=depth))["score"].pov(chess.WHITE)
         int_end_eval = self.parse_eval(end_eval)
+        if fast_mode:
+            return {"eval": end_eval}
 
         if num_legal_moves == 1:
             return {"eval": end_eval, "bestmove": legal_moves[0], "type": "forced"}
