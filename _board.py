@@ -28,17 +28,17 @@ from tkinter.filedialog import askopenfilename
 from _constants import *
 from _button import Button
 from _slider import Slider
+from _checkbox import Checkbox
 Tk().withdraw()
 
 
 class Board:
-    button_load_pgn = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Load PGN", 1, BLACK), 3, GRAY)
-    button_load_engine = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Load Engine", 1, BLACK), 3, GRAY)
-    button_analyze = Button((WHITE, GRAY_LIGHT, GRAY_DARK), FONT_MED.render("Analyze", 1, BLACK), 3, GRAY)
+    button_load_pgn = Button((WHITE, GRAY_DARK, GRAY_LIGHT), FONT_MED.render("Load PGN", 1, BLACK), 3, GRAY)
+    button_load_engine = Button((WHITE, GRAY_DARK, GRAY_LIGHT), FONT_MED.render("Load Engine", 1, BLACK), 3, GRAY)
+    button_analyze = Button((WHITE, GRAY_DARK, GRAY_LIGHT), FONT_MED.render("Analyze", 1, BLACK), 3, GRAY)
     slider_depth = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, 30), init_val=10)
     slider_threads = Slider(rect_color=GRAY, circle_color=WHITE, val_range=(1, multiprocessing.cpu_count()), init_val=multiprocessing.cpu_count()-1)
-    checkbox_fast_mode = chess.Board()
-    checkbox_fast_mode.value = True
+    checkbox_fast_mode = Checkbox(True, FONT_MED.render("Detailed Analysis", 1, WHITE))
 
     eval_slider_range = 800
 
@@ -141,7 +141,8 @@ class Board:
                 threads_text = FONT_MED.render(f"Threads: {self.slider_threads.value}", 1, WHITE)
                 window.blit(threads_text, (loc[0] + sep_size*2 + 300 - threads_text.get_width()/2, loc[1]+225))
 
-                self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+250), (200, 50))
+                self.checkbox_fast_mode.draw(window, events, (loc[0] + size[0] / 2 - 75, loc[1]+300), 8)
+                self.button_analyze.draw(window, events, (loc[0] + size[0] / 2 - 100, loc[1]+350), (200, 50))
                 self.slider_depth.draw(window, events, (loc[0] + sep_size, loc[1]+200), (200, 10), 15)
                 self.slider_threads.draw(window, events, (loc[0] + sep_size*2 + 200, loc[1]+200), (200, 10), 15)
 
