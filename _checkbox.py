@@ -27,7 +27,7 @@ class Checkbox:
     def draw(self, window, events, loc, box_size):
         window.blit(self.text, (loc[0] + box_size+10, loc[1] - self.text.get_height()/2))
         pygame.draw.circle(window, WHITE, loc, box_size)
-        if self.value:
+        if not self.value:
             pygame.draw.circle(window, CYAN, loc, box_size - 2)
 
         for event in events:
