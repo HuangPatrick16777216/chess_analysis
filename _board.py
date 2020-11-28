@@ -169,6 +169,11 @@ class Board:
                         slider_fac = max(0.5 - value / eval_range * 0.3, 0.03)
                         slider_text = f"-{value/100}"
 
+            if slider_text == "+M0":
+                slider_text = "1 - 0"
+            elif slider_text == "-M0":
+                slider_text = "0 - 1"
+
             eval_start_y = 0
             rect_params = (loc[0], loc[1]+eval_start_y, 20)
             pygame.draw.rect(window, GRAY_LIGHT, rect_params + (size[1]-eval_start_y,))
