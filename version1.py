@@ -15,6 +15,7 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+import os
 import pygame
 import chess
 import chess.engine
@@ -24,6 +25,7 @@ from tkinter.filedialog import askopenfilename
 pygame.init()
 Tk().withdraw()
 
+PARDIR = os.path.realpath(os.path.dirname(__file__))
 SCREEN = (1600, 900)
 FPS = 60
 
@@ -39,6 +41,17 @@ BOARD_WHITE_MARK = (190, 190, 180)
 BOARD_BLACK = (100, 140, 80)
 BOARD_BLACK_SELECT = (140, 180, 80)
 BOARD_BLACK_MARK = (70, 120, 50)
+
+IMAGES = {}
+
+for file in os.listdir(os.path.join(PARDIR, "images")):
+    if file.endswith(".png"):
+        image = pygame.image.load(os.path.join(PARDIR, "images", file))
+        name = file.replace(".png", "")
+        if len(name) == 2 and name[0] in ("b", "w"):
+            name = name[1].upper() if name[0] == "w" else name[1].lower()
+
+        IMAGES[name] = image
 
 
 class Button:
@@ -140,6 +153,7 @@ class Board:
 
 def main():
     pygame.display.set_caption("Chess Analysis")
+    pygame.display.set_icon(IMAGES["ic"])
     window = pygame.display.set_mode(SCREEN)
 
     clock = pygame.time.Clock()
