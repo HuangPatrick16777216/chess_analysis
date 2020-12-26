@@ -115,6 +115,8 @@ class Slider:
 
 
 class Board:
+    sq_size = 100
+
     def __init__(self):
         self.pgn_moves = None
 
@@ -125,8 +127,8 @@ class Board:
         window.blit(surface, (50, 50))
 
     def draw_squares(self):
+        sq_size = self.sq_size
         surface = pygame.Surface((800, 800))
-        sq_size = 100
         for row in range(8):
             for col in range(8):
                 loc = (sq_size * col, sq_size * row)
