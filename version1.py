@@ -33,6 +33,13 @@ GRAY = (128, 128, 128)
 GRAY_LIGHT = (192, 192, 192)
 WHITE = (255, 255, 255)
 
+BOARD_WHITE = (220, 220, 210)
+BOARD_WHITE_SELECT = (240, 240, 200)
+BOARD_WHITE_MARK = (190, 190, 180)
+BOARD_BLACK = (100, 140, 80)
+BOARD_BLACK_SELECT = (140, 180, 80)
+BOARD_BLACK_MARK = (70, 120, 50)
+
 
 class Button:
     def __init__(self, loc, size, text):
@@ -107,11 +114,34 @@ class Slider:
         return fac * self.size[0] + self.loc[0]
 
 
+class Board:
+    def __init__(self):
+        self.pgn_moves = None
+
+    def draw(self, window, events):
+        surface = pygame.Surface((800, 800))
+        surface.blit(self.draw_squares(), (0, 0))
+
+        window.blit(surface, (50, 50))
+
+    def draw_squares(self):
+        surface = pygame.Surface((800, 800))
+        sq_size = 100
+        for row in range(8):
+            for col in range(8):
+                loc = (sq_size * col, sq_size * row)
+                color = BOARD_WHITE if (row+col) % 2 == 0 else BOARD_BLACK
+                pygame.draw.rect(surface, color, loc+(sq_size, sq_size))
+
+        return surface
+
+
 def main():
     pygame.display.set_caption("Chess Analysis")
     window = pygame.display.set_mode(SCREEN)
 
     clock = pygame.time.Clock()
+    board = Board()
     while True:
         clock.tick(FPS)
         pygame.display.update()
@@ -122,6 +152,7 @@ def main():
                 return
 
         window.fill(BLACK)
+        board.draw(window, events)
 
 
 main()
