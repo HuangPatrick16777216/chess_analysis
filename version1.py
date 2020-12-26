@@ -51,7 +51,7 @@ for file in os.listdir(os.path.join(PARDIR, "images")):
         if len(name) == 2 and name[0] in ("b", "w"):
             name = name[1].upper() if name[0] == "w" else name[1].lower()
 
-        IMAGES[name] = image
+        IMAGES[name] = pygame.transform.scale(image, (90, 90))
 
 
 class Button:
@@ -132,21 +132,37 @@ class Board:
 
     def __init__(self):
         self.pgn_moves = None
+        self.position = chess.Board()
 
     def draw(self, window, events):
         surface = pygame.Surface((800, 800))
         surface.blit(self.draw_squares(), (0, 0))
+        surface.blit(self.draw_pieces(), (0, 0))
 
         window.blit(surface, (50, 50))
 
     def draw_squares(self):
         sq_size = self.sq_size
-        surface = pygame.Surface((800, 800))
+        surface = pygame.Surface((sq_size*8,)*2, pygame.SRCALPHA)
+
         for row in range(8):
             for col in range(8):
                 loc = (sq_size * col, sq_size * row)
                 color = BOARD_WHITE if (row+col) % 2 == 0 else BOARD_BLACK
                 pygame.draw.rect(surface, color, loc+(sq_size, sq_size))
+
+        return surface
+
+    def draw_pieces(self):
+        sq_size = self.sq_size
+        surface = pygame.Surface((sq_size*8,)*2, pygame.SRCALPHA)
+
+        for row in range(8):
+            for col in range(8):
+                piece = self.position.piece_at(8 * (7-row) + col)
+                if piece is not None:
+                    image = IMAGES[piece.symbol()]
+                    surface.blit(image, (sq_size * col + 5, sq_size * row + 5))
 
         return surface
 
