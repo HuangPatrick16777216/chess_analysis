@@ -30,6 +30,8 @@ PARDIR = os.path.realpath(os.path.dirname(__file__))
 SCREEN = (1600, 900)
 FPS = 60
 
+FONT_MED = pygame.font.SysFont("arial", 18)
+
 BLACK = (0, 0, 0)
 GRAY_DARK = (64, 64, 64)
 GRAY = (128, 128, 128)
@@ -132,6 +134,7 @@ class Slider:
 class Board:
     sq_size = 100
     loc = (50, 50)
+    button_load_pgn = Button((1175, 50), (150, 35), FONT_MED.render("Load PGN", 1, BLACK))
 
     def __init__(self):
         self.pgn_moves = None
@@ -143,6 +146,7 @@ class Board:
         surface = pygame.Surface((800, 800))
         surface.blit(self.draw_squares(), (0, 0))
         surface.blit(self.draw_pieces(), (0, 0))
+        self.draw_elements(window, events)
 
         if self.flipped:
             surface = pygame.transform.rotate(surface, 180)
@@ -176,6 +180,9 @@ class Board:
                     surface.blit(image, (sq_size * col + 5, sq_size * row + 5))
 
         return surface
+
+    def draw_elements(self, window, events):
+        self.button_load_pgn.draw(window, events)
 
     def update(self, events):
         loc = self.loc
