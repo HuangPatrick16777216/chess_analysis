@@ -20,6 +20,7 @@ import pygame
 import chess
 import chess.engine
 import chess.pgn
+from copy import deepcopy
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 pygame.init()
@@ -48,8 +49,10 @@ for file in os.listdir(os.path.join(PARDIR, "images")):
     if file.endswith(".png"):
         image = pygame.image.load(os.path.join(PARDIR, "images", file))
         name = file.replace(".png", "")
+
         if len(name) == 2 and name[0] in ("b", "w"):
             name = name[1].upper() if name[0] == "w" else name[1].lower()
+            shadow = deepcopy(image)
 
         IMAGES[name] = pygame.transform.scale(image, (90, 90))
 
@@ -129,17 +132,22 @@ class Slider:
 
 class Board:
     sq_size = 100
+    loc = (50, 50)
 
     def __init__(self):
         self.pgn_moves = None
+        self.flipped = False
         self.position = chess.Board()
 
     def draw(self, window, events):
         surface = pygame.Surface((800, 800))
         surface.blit(self.draw_squares(), (0, 0))
         surface.blit(self.draw_pieces(), (0, 0))
+        self.update(events)
 
-        window.blit(surface, (50, 50))
+        if self.flipped:
+            surface = pygame.transform.rotate(surface, 180)
+        window.blit(surface, self.loc)
 
     def draw_squares(self):
         sq_size = self.sq_size
@@ -162,9 +170,17 @@ class Board:
                 piece = self.position.piece_at(8 * (7-row) + col)
                 if piece is not None:
                     image = IMAGES[piece.symbol()]
+                    if self.flipped:
+                        image = pygame.transform.rotate(image, 180)
                     surface.blit(image, (sq_size * col + 5, sq_size * row + 5))
 
         return surface
+
+    def update(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.K_x:
+                    self.flipped = not self.flipped
 
 
 def main():
