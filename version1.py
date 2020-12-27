@@ -52,7 +52,6 @@ for file in os.listdir(os.path.join(PARDIR, "images")):
 
         if len(name) == 2 and name[0] in ("b", "w"):
             name = name[1].upper() if name[0] == "w" else name[1].lower()
-            shadow = deepcopy(image)
 
         IMAGES[name] = pygame.transform.scale(image, (90, 90))
 
