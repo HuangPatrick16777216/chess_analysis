@@ -136,17 +136,19 @@ class Board:
     def __init__(self):
         self.pgn_moves = None
         self.flipped = False
+        self.selected = None
         self.position = chess.Board()
 
     def draw(self, window, events):
         surface = pygame.Surface((800, 800))
         surface.blit(self.draw_squares(), (0, 0))
         surface.blit(self.draw_pieces(), (0, 0))
-        self.update(events)
 
         if self.flipped:
             surface = pygame.transform.rotate(surface, 180)
         window.blit(surface, self.loc)
+
+        self.update(events)
 
     def draw_squares(self):
         sq_size = self.sq_size
@@ -176,6 +178,15 @@ class Board:
         return surface
 
     def update(self, events):
+        loc = self.loc
+        sq_size = self.sq_size
+
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = (mouse_pos[0] - loc[0], mouse_pos[1] - loc[1])
+        mouse_grid = (mouse_pos[0] // sq_size, mouse_pos[1] // sq_size)
+        if self.flipped:
+            mouse_grid = (7 - mouse_grid[0], 7 - mouse_grid[1])
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_x:
