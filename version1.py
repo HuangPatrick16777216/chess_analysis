@@ -177,8 +177,8 @@ class Board:
 
     def update(self, events):
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == pygame.K_x:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_x:
                     self.flipped = not self.flipped
 
 
